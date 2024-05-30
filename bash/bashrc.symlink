@@ -1,0 +1,115 @@
+alias log='git log | vim -R -'
+
+## Start PS1 Changes
+# Colors for PS1
+COLOR_WHITE="\033[38;5;15m"
+COLOR_YELLOW="\033[38;5;11m"
+COLOR_CYAN="\033[38;5;14m"
+COLOR_RED="\033[0;31m"
+COLOR_GREEN="\033[0;32m"
+COLOR_RESET="\033[0m"
+
+COLOR_PROMPT="\033[01;33m"
+# Git coloring courtesy of
+# https://coderwall.com/p/pn8f0g/show-your-git-status-and-branch-in-color-at-the-command-prompt
+function git_color {
+    local git_status="$(git status 2> /dev/null)"
+
+    if echo $git_status | grep "nothing to commit" > /dev/null 2>&1; then
+        echo -e $COLOR_GREEN
+    else
+        echo -e $COLOR_RED
+    fi
+}
+
+function git_branch {
+    local git_status="$(git status 2> /dev/null)"
+    local on_branch="On branch ([^${IFS}]*)"
+    local on_commit="HEAD detached at ([^${IFS}*])"
+
+    if [[ $git_status =~ $on_branch ]]; then
+        local branch=${BASH_REMATCH[1]}
+        echo "($branch)"
+    elif [[ $git_status =~ $on_commit ]]; then
+        local commit=${BASH_REMATCH[1]}
+        echo "($commit)"
+    fi
+}
+
+
+git_default_branch() {
+  (git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@') 2>/dev/null
+}
+
+alias git-default="git switch $(git_default_branch) && git pull origin $(git_default_branch)"
+
+
+function prev_func_err {
+    if [[ $? -ne 0 ]]; then
+        echo -e ":( "
+    fi
+}
+
+if [ ! -f ~/.whoami_custom ]; then
+    touch ~/.whoami_custom
+fi
+
+function tag_whoami {
+    echo "$1" > ~/.whoami_custom
+}
+
+custom_whoami="$(cat ~/.whoami_custom)"
+if [ -z "$custom_whoami" ]; then
+    custom_whoami="$(whoami)"
+fi
+
+# Change the prompt
+PS1="\$(prev_func_err)"
+# Username or custom tag and "in"
+PS1+="\[$COLOR_PROMPT\]\$custom_whoami\[$COLOR_WHITE\] in "
+ # Basename of dir
+PS1+="\[$COLOR_CYAN\]\W\[$COLOR_WHITE\]"
+# Branch and color
+PS1+="\[\$(git_color)\]\$(git_branch)"
+# Trailing `$`
+PS1+="\[$COLOR_WHITE\]$ \[$COLOR_RESET\]"
+## End PS1 Changes
+
+if [ -f ~/.ssh/id_rsa ]; then
+    eval $(ssh-agent)
+    ssh-add ~/.ssh/id_rsa
+    alias copy_pub="cat ~/.ssh/id_rsa.pub | pbcopy"
+fi
+
+
+# History Controls
+HISTCONTROL=ignoredups:erasedups:ignorespace
+HISTSIZE=9000
+HISTFILESIZE=$HISTSIZE
+# When the shell exits, append to the history file instead of overwriting it
+shopt -s histappend
+# After each command, append to the history file and reread it
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -c; history -r"
+
+# Add in Alias
+alias gx='git remote prune origin && git-delete-squashed'
+alias git-delete-local='git branch | grep -v '^*' | xargs git branch -D'
+alias work='cd ~/Professional'
+alias work_summary='code ~/Personal/WorkSummary'
+alias git-lint='git diff main --name-only *.rb | xargs script/lint -a'
+alias dc-down='docker-compose down && docker-compose down --volumes'
+alias gs='git status'
+alias ga='git add .'
+alias gapc='git add . && pre-commit'
+alias kctl=kubectl
+
+source ~/.bash_secrets || touch ~/.bash_secrets
+
+alias git-lint='git diff main --name-only *.rb | xargs script/lint -A'
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
+export PATH=/opt/homebrew/bin:$PATH
+
+alias python='python3'
+export GARDEN_LOGGER_TYPE=basic
