@@ -10,6 +10,9 @@ COLOR_GREEN="\033[0;32m"
 COLOR_RESET="\033[0m"
 
 COLOR_PROMPT="\033[01;33m"
+
+export ATT_ROOT=/workspace/all-the-things
+
 # Git coloring courtesy of
 # https://coderwall.com/p/pn8f0g/show-your-git-status-and-branch-in-color-at-the-command-prompt
 function git_color {
@@ -35,6 +38,11 @@ function git_branch {
         echo "($commit)"
     fi
 }
+
+function switch_to_master_and_pull() {
+    git checkout master && git pull && git checkout -
+}
+
 
 
 git_default_branch() {
@@ -64,15 +72,15 @@ if [ -z "$custom_whoami" ]; then
 fi
 
 # Change the prompt
-PS1="\$(prev_func_err)"
+# PS1="\$(prev_func_err)"
 # Username or custom tag and "in"
-PS1+="\[$COLOR_PROMPT\]\$custom_whoami\[$COLOR_WHITE\] in "
+# PS1+="\[$COLOR_PROMPT\]\$custom_whoami\[$COLOR_WHITE\] in "
  # Basename of dir
-PS1+="\[$COLOR_CYAN\]\W\[$COLOR_WHITE\]"
+# PS1+="\[$COLOR_CYAN\]\W\[$COLOR_WHITE\]"
 # Branch and color
-PS1+="\[\$(git_color)\]\$(git_branch)"
+# PS1+="\[\$(git_color)\]\$(git_branch)"
 # Trailing `$`
-PS1+="\[$COLOR_WHITE\]$ \[$COLOR_RESET\]"
+# PS1+="\[$COLOR_WHITE\]$ \[$COLOR_RESET\]"
 ## End PS1 Changes
 
 if [ -f ~/.ssh/id_rsa ]; then
