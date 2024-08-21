@@ -14,7 +14,7 @@ sym "$dotfs"
 
 touch ~/dotfiles_ran
 
-git clone git@github.com:paulsaccount/SecretDotfiles.git ~/.dotfiles/SecretDotfiles
+git clone git@github.com:paulsaccount/SecretDotfiles.git ~/.dotfiles/SecretDotfiles > ~/secrets_dot_files_git_log.txt
 
 export PATH=$PATH:~/.dotfiles/SecretDotfiles
 
